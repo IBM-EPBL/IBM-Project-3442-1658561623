@@ -1,45 +1,52 @@
-import os
-
-import numpy as np
+from flask import Flask, render_template, request
 from PIL import Image
-from flask import Flask, request, render_template
-from keras.models import load_model
-from werkzeug.utils import secure_filename
-
-UPLOAD_FOLDER = 'C:/Users/Aadi/PycharmProject/application/uploads'
-
-
-app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-model = load_model("mnistCNN.h5")
+import numpy as np
+from tensorflow.keras.models import load_model
+import tensorflow as tf
+from flask import Flask
+#You need to use following line [app Flask(__name__)]
+app = Flask(__name__,template_folder="templates")
+model = load_model("models\mnistCNN.h5")
 
 
 @app.route('/')
-def index():
-    return render_template('index.html')
+def upload_file():
+  return render_template('index.html')
+@app.route('/main')
+def upload_file1():
+  return render_template('main.html')
 
-
-@app.route('/predict', methods=['GET', 'POST'])
-def upload():
-    if request.method == "POST":
-        f = request.files["image"]
-        filepath = secure_filename(f.filename)
-        f.save(os.path.join(app.config['UPLOAD_FOLDER'], filepath))
-
-        upload_img = os.path.join(UPLOAD_FOLDER, filepath)
-        img = Image.open(upload_img).convert("L")  # convert image to monochrome
-        img = img.resize((28, 28))  # resizing of input image
-
-        im2arr = np.array(img)  # converting to image
-        im2arr = im2arr.reshape(1, 28, 28, 1)  # reshaping according to our requirement
-
-        pred = model.predict(im2arr)
-
-        num = np.argmax(pred, axis=1)  # printing our Labels
-
-        return render_template('predict.html', num=str(num[0]))
+@app.route('/predict',methods = ['POST'])
+def upload_image_file():
+  if request.method == 'POST':
+    img = Image.open(request.files['file'].stream).convert("L")
+    img = img.resize((28,28))
+    im2arr = np.array(img)
+    im2arr = im2arr.reshape(1,28,28,1)
+    y_pred = model.predict_classes(im2arr)
+    print(y_pred) 
+  if(y_pred == 0) :
+    return render_template("0.html", showcase = str(y_pred))
+  elif(y_pred == 1) :
+    return render_template("1.html ", showcase = str(y_pred))
+  elif(y_pred == 2) :
+    return render_template("2.html", showcase = str(y_pred))
+  elif(y_pred == 3) :
+    return render_template("3.html", showcase = str(y_pred))
+  elif(y_pred == 4) :
+    return render_template("4.html", showcase = str(y_pred))
+  elif(y_pred == 5) :
+    return render_template("5.html", showcase = str(y_pred))
+  elif(y_pred == 6) :
+    return render_template("6.html", showcase = str(y_pred))
+  elif(y_pred == 7) :
+    return render_template("7.html", showcase = str(y_pred))
+  elif(y_pred == 8) :
+    return render_template("8.html", showcase = str(y_pred))
+  else :
+    return render_template("9.html", showcase = str(y_pred))
+  
 
 
 if __name__ == '__main__':
-    app.run(debug=True, threaded=False)
+  app.run(host='0.0.0.0',port=8000,debug=True,threaded=False)
